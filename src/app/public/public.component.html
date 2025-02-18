@@ -1,0 +1,88 @@
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #D9B7E9;
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .main-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 4rem;
+  }
+
+  .text-content {
+    flex: 1;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    font-family: 'Segoe Script', cursive;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    font-family: 'Segoe Script', cursive;
+    margin-bottom: 2rem;
+    color: #444;
+  }
+
+  p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+    max-width: 600px;
+  }
+
+  .image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-image {
+    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .hero-image {
+      max-width: 100%;
+    }
+  }
+</style>
+
+<body>
+  <!-- Include navbar here -->
+  <app-navbar></app-navbar>
+  <div class="container">
+    <div class="main-content">
+      <div class="text-content">
+        <h1>Welcome</h1>
+        <h2>Find your best friend</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisi nec malesuada feugiat, sapien
+          magna dapibus felis, nec sodales libero libero nec ex. Nullam euismod risus a sapien blandit, eget</p>
+      </div>
+      <div class="image-container">
+        <img src="../../assets/pic.png" alt="Person hugging a dog" class="hero-image">
+      </div>
+    </div>
+  </div>
+</body>
