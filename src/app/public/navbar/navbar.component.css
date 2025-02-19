@@ -1,7 +1,10 @@
 .navbar {
-  background-color: transparent;
-  padding: 1rem 2rem;
+  background-color: white;
+  padding: 0.5rem 2rem;
+  height: 3.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+
 
 .nav-container {
   max-width: 1200px;
@@ -9,6 +12,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
+
 }
 
 .nav-links {

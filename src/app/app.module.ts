@@ -13,17 +13,36 @@ import { TimelineComponent } from './private/timeline/timeline.component';
 import { NavbarComponent } from './public/navbar/navbar.component';
 import { RouterModule, Routes } from '@angular/router';
 import { SignupComponent } from './public/signup/signup.component';
+import { PrivateNavbarComponent } from './private/private-navbar/private-navbar.component';
+
 
 const appRoutes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'about', component: AboutComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+  {
+    path: '',
+    component: PublicComponent,
+    children: [
+      { path: '', component: HomeComponent },
+      { path: 'about', component: AboutComponent },
+      { path: 'login', component: LoginComponent },
+      { path: 'signup', component: SignupComponent }
+    ]
+  },
+  {
+    path: 'dashboard',
+    component: PrivateComponent,
+    children: [
+      { path: '', component: HomeComponent },
 
-  { path: 'private', component: PrivateComponent }
+      { path: 'profile', component: UserComponent },
+      { path: 'timeline', component: UserComponent }
+      // { path: 'profile', component: UserComponent }
+
+      // Add other private routes here
+    ]
+  }
+];
 
 
-]
 @NgModule({
   declarations: [
     AppComponent,
@@ -36,7 +55,8 @@ const appRoutes: Routes = [
     SignupComponent,
     UserComponent,
     TimelineComponent,
-    NavbarComponent
+    NavbarComponent,
+    PrivateNavbarComponent
   ],
   imports: [
     BrowserModule,
