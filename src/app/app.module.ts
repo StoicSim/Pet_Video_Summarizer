@@ -11,7 +11,19 @@ import { LoginComponent } from './public/login/login.component';
 import { UserComponent } from './private/user/user.component';
 import { TimelineComponent } from './private/timeline/timeline.component';
 import { NavbarComponent } from './public/navbar/navbar.component';
+import { RouterModule, Routes } from '@angular/router';
+import { SignupComponent } from './public/signup/signup.component';
 
+const appRoutes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'about', component: AboutComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'signup', component: SignupComponent },
+
+  { path: 'private', component: PrivateComponent }
+
+
+]
 @NgModule({
   declarations: [
     AppComponent,
@@ -21,12 +33,14 @@ import { NavbarComponent } from './public/navbar/navbar.component';
     PrivateComponent,
     AboutComponent,
     LoginComponent,
+    SignupComponent,
     UserComponent,
     TimelineComponent,
     NavbarComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
   ],
   providers: [],
   bootstrap: [AppComponent]
