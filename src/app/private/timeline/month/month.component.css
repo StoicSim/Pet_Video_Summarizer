@@ -1,0 +1,189 @@
+.month-container {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 15px;
+  padding: 2rem;
+  height: calc(100vh - 16rem);
+  position: relative;
+  box-shadow: 0 5px 15px rgba(155, 107, 165, 0.1);
+}
+
+.month-header {
+  margin-bottom: 2rem;
+}
+
+.month-title {
+  font-size: 2rem;
+  color: #7d4b87;
+  margin: 0;
+  font-weight: 600;
+}
+
+.month-subtitle {
+  color: #666;
+  margin: 0.5rem 0 0 0;
+  font-size: 1.1rem;
+}
+
+.feature-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  overflow-y: auto;
+  padding-right: 1rem;
+  /* Space for scrollbar */
+}
+
+/* Custom scrollbar */
+.feature-cards-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.feature-cards-container::-webkit-scrollbar-track {
+  background: rgba(155, 107, 165, 0.1);
+  border-radius: 4px;
+}
+
+.feature-cards-container::-webkit-scrollbar-thumb {
+  background: rgba(155, 107, 165, 0.3);
+  border-radius: 4px;
+}
+
+.feature-cards-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(155, 107, 165, 0.5);
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 247, 237, 0.5);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow:
+    0 10px 20px rgba(155, 107, 165, 0.15),
+    0 3px 6px rgba(155, 107, 165, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 15px 30px rgba(155, 107, 165, 0.2),
+    0 5px 10px rgba(155, 107, 165, 0.15);
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  color: #7d4b87;
+  margin: 0 0 1rem 0;
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  /* 16:9 aspect ratio */
+  border-radius: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 4px solid white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.thumbnail-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.video-thumbnail:hover .thumbnail-img {
+  transform: scale(1.05);
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  opacity: 0;
+  transition: all 0.3s ease;
+  background-color: rgba(155, 107, 165, 0.8);
+  padding: 1rem;
+  border-radius: 50%;
+}
+
+.video-thumbnail:hover .play-overlay {
+  opacity: 1;
+}
+
+.memory-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.feature-summary {
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+}
+
+.video-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9b6ba5;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background-color: rgba(155, 107, 165, 0.1);
+  align-self: flex-start;
+}
+
+.video-link:hover {
+  color: #7d4b87;
+  background-color: rgba(155, 107, 165, 0.2);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .month-container {
+    padding: 1rem;
+    height: auto;
+    min-height: calc(100vh - 12rem);
+  }
+
+  .month-title {
+    font-size: 1.5rem;
+  }
+
+  .month-subtitle {
+    font-size: 1rem;
+  }
+
+  .feature-cards-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .feature-card {
+    padding: 1rem;
+  }
+
+  .feature-title {
+    font-size: 1.25rem;
+  }
+}
