@@ -14,6 +14,10 @@ import { NavbarComponent } from './public/navbar/navbar.component';
 import { RouterModule, Routes } from '@angular/router';
 import { SignupComponent } from './public/signup/signup.component';
 import { PrivateNavbarComponent } from './private/private-navbar/private-navbar.component';
+import { TodayComponent } from './private/timeline/today/today.component';
+import { DateComponent } from './private/timeline/date/date.component';
+import { MonthComponent } from './private/timeline/month/month.component';
+import { WeekComponent } from './private/timeline/week/week.component';
 
 
 const appRoutes: Routes = [
@@ -34,10 +38,17 @@ const appRoutes: Routes = [
       { path: '', component: HomeComponent },
 
       { path: 'profile', component: UserComponent },
-      { path: 'timeline', component: UserComponent }
-      // { path: 'profile', component: UserComponent }
+      {
+        path: 'timeline', component: TimelineComponent,
+        children: [
+          { path: '', component: TodayComponent },
+          { path: 'date', component: DateComponent },
+          { path: 'month', component: MonthComponent },
+          { path: 'week', component: WeekComponent },
 
-      // Add other private routes here
+        ]
+      }
+
     ]
   }
 ];
