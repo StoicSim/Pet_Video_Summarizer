@@ -25,6 +25,7 @@ import { DateComponent } from './private/timeline/date/date.component';
 import { MonthComponent } from './private/timeline/month/month.component';
 import { WeekComponent } from './private/timeline/week/week.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 const appRoutes: Routes = [
@@ -81,6 +82,8 @@ const appRoutes: Routes = [
 
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     BrowserModule,
     RouterModule.forRoot(appRoutes),
     MatDatepickerModule,
