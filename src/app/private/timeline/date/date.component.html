@@ -1,1 +1,48 @@
-<p>date works!</p>
+<div class="entry-content">
+  <!-- Left side content -->
+  <div class="text-content">
+    <h2 class="date-title" *ngIf="!hasSelectedDate">Choose a Date!</h2>
+    <p class="date-summary" *ngIf="!hasSelectedDate">
+      Select a date from the calendar to view your pet's memories from that day.
+      Browse through past adventures and relive those special moments!
+    </p>
+
+    <!-- Show this after date selection -->
+    <div *ngIf="hasSelectedDate">
+      <h2 class="pet-title">{{ timelineEntry.petName }} on {{ selectedDate | date:'yyyy/MM/dd' }}</h2>
+
+      <!-- Move thumbnail into text content area -->
+      <div class="video-thumbnail-container">
+        <div class="video-thumbnail">
+          <img src="../../assets/pic.png" [alt]="timelineEntry.petName + ' video thumbnail'" class="thumbnail-img">
+          <div class="play-overlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="10 8 16 12 10 16 10 8"></polygon>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <p class="summary">{{ timelineEntry.summary }}</p>
+      <a [href]="timelineEntry.videoLink" target="_blank" class="video-link">
+        <span class="link-text">Watch Full Video</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Right side - calendar always visible -->
+  <div class="calendar-container">
+    <mat-card class="calendar-card">
+      <mat-calendar [selected]="selectedDate" (selectedChange)="onDateSelected($event)" [dateClass]="dateClass">
+      </mat-calendar>
+    </mat-card>
+  </div>
+</div>

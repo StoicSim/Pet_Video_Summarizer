@@ -1,6 +1,12 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatCardModule } from '@angular/material/card';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+
 import { AppComponent } from './app.component';
 import { SharedComponent } from './shared/shared.component';
 import { HomeComponent } from './shared/home/home.component';
@@ -18,6 +24,7 @@ import { TodayComponent } from './private/timeline/today/today.component';
 import { DateComponent } from './private/timeline/date/date.component';
 import { MonthComponent } from './private/timeline/month/month.component';
 import { WeekComponent } from './private/timeline/week/week.component';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 
 const appRoutes: Routes = [
@@ -67,13 +74,23 @@ const appRoutes: Routes = [
     UserComponent,
     TimelineComponent,
     NavbarComponent,
-    PrivateNavbarComponent
+    PrivateNavbarComponent,
+    DateComponent,
+    MonthComponent,
+    WeekComponent
+
   ],
   imports: [
     BrowserModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCardModule,
+    BrowserAnimationsModule
   ],
-  providers: [],
+  providers: [
+    provideAnimationsAsync()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

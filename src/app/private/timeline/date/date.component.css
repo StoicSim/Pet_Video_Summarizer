@@ -1,0 +1,231 @@
+.entry-content {
+  display: flex;
+  gap: 3rem;
+  background-color: white;
+  border-radius: 15px;
+  padding: 2rem;
+  height: calc(100vh - 16rem);
+  position: relative;
+}
+
+.text-content {
+  flex: 1;
+  padding-right: 2rem;
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid rgba(155, 107, 165, 0.2);
+  padding-left: 2rem;
+}
+
+.date-title {
+  font-size: 2.5rem;
+  color: #7d4b87;
+  margin-bottom: 1.5rem;
+  font-family: 'Segoe Script', cursive;
+}
+
+.date-summary {
+  color: #666;
+  line-height: 1.8;
+  font-size: 1.2rem;
+  flex-grow: 1;
+}
+
+.pet-title {
+  font-size: 2rem;
+  color: #7d4b87;
+  margin-bottom: 1.5rem;
+  font-family: 'Segoe Script', cursive;
+}
+
+.summary {
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  flex-grow: 1;
+}
+
+.video-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9b6ba5;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background-color: rgba(155, 107, 165, 0.1);
+  align-self: flex-start;
+}
+
+.video-link:hover {
+  color: #7d4b87;
+  background-color: rgba(155, 107, 165, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Calendar styling */
+.calendar-container {
+  flex: 0 0 400px;
+  padding: 1.5rem;
+  background-color: rgba(255, 247, 237, 0.5);
+  border-radius: 20px;
+  box-shadow:
+    0 10px 20px rgba(155, 107, 165, 0.15),
+    0 3px 6px rgba(155, 107, 165, 0.1);
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.calendar-container:hover {
+  transform: translateY(-25px);
+  box-shadow:
+    0 15px 30px rgba(155, 107, 165, 0.2),
+    0 5px 10px rgba(155, 107, 165, 0.15);
+}
+
+.calendar-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Media content styling - matches today component */
+.media-content {
+  flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: rgba(255, 247, 237, 0.5);
+  border-radius: 20px;
+  box-shadow:
+    0 10px 20px rgba(155, 107, 165, 0.15),
+    0 3px 6px rgba(155, 107, 165, 0.1);
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.media-content:hover {
+  transform: translateY(-25px);
+  box-shadow:
+    0 15px 30px rgba(155, 107, 165, 0.2),
+    0 5px 10px rgba(155, 107, 165, 0.15);
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 4px solid white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.video-thumbnail:hover .thumbnail-img {
+  transform: scale(1.05);
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  opacity: 0;
+  transition: all 0.3s ease;
+  background-color: rgba(155, 107, 165, 0.8);
+  padding: 1rem;
+  border-radius: 50%;
+}
+
+.video-thumbnail:hover .play-overlay {
+  opacity: 1;
+}
+
+.thumbnail-title {
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  color: #7d4b87;
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Decorative elements */
+.media-content::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 50px;
+  height: 50px;
+  background-color: rgba(155, 107, 165, 0.1);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.media-content::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: -10px;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(155, 107, 165, 0.1);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* Override Material Calendar styles */
+::ng-deep .mat-calendar {
+  background: transparent;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  background-color: #9b6ba5;
+  border-color: #9b6ba5;
+}
+
+::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: #9b6ba5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .entry-content {
+    flex-direction: column;
+    height: auto;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+
+  .calendar-container,
+  .media-content {
+    flex: 0 0 auto;
+    width: 100%;
+    transform: translateY(0);
+    margin-bottom: 2rem;
+  }
+
+  .text-content {
+    padding-right: 0;
+    padding-left: 1rem;
+  }
+
+  .video-thumbnail {
+    height: 200px;
+  }
+}
