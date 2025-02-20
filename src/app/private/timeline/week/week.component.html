@@ -1,1 +1,43 @@
-<p>week works!</p>
+<div class="weekly-features-container">
+  <div class="day-selector">
+    <button *ngFor="let card of featureCards" class="day-button" [class.active]="selectedDay === card.day"
+      (click)="selectDay(card.day)">
+      {{ card.day }}
+    </button>
+  </div>
+
+  <div class="feature-content" *ngIf="selectedDay">
+    <div class="feature-card">
+      <h2 class="feature-title">{{ getSelectedCard()?.petName }} on {{ selectedDay }}</h2>
+
+      <div class="video-thumbnail">
+        <img [src]="getSelectedCard()?.thumbnailUrl" [alt]="getSelectedCard()?.petName + ' video thumbnail'"
+          class="thumbnail-img">
+        <div class="play-overlay">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+        </div>
+      </div>
+
+      <p class="feature-summary">{{ getSelectedCard()?.summary }}</p>
+
+      <a [href]="getSelectedCard()?.videoLink" target="_blank" class="video-link">
+        <span class="link-text">Watch Full Video</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="weekly-prompt" *ngIf="!selectedDay">
+    <h2 class="prompt-title">Select a Day of the Week</h2>
+    <p class="prompt-text">Choose a day to see featured pet memories from that day of the week.</p>
+  </div>
+</div>
