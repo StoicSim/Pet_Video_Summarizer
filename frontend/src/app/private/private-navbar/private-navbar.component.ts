@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-private-navbar',
@@ -9,14 +10,17 @@ import { Router } from '@angular/router';
 export class PrivateNavbarComponent {
   isDropdownOpen = false;
 
-  constructor(private route: Router) {
+  constructor(private route: Router, public authService: AuthService) {
 
   }
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  logout() {
-    this.route.navigate(['']);
+  logout(): void {
+    this.authService.logout();
   }
+  // logout() {
+  //   this.route.navigate(['']);
+  // }
 }

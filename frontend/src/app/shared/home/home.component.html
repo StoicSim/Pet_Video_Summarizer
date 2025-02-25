@@ -1,8 +1,18 @@
-<body>
-  <div class="container">
-    <h1 class="title">Furtales</h1>
-    <img src="../../assets/pic.png" alt="Circular placeholder image" class="circular-image">
-    <input type="text" class="link-input" placeholder="Enter video link here">
-    <button class="upload-button">Upload</button>
-  </div>
-</body>
+<div class="container">
+
+  <h1 class="title">FurTales</h1>
+
+  <img src="assets/pic.png" alt="Profile Picture" class="circular-image">
+
+  <!-- Video link input - always visible -->
+  <input type="text" class="link-input" placeholder="Enter video link here" [(ngModel)]="videoUrl" required>
+
+  <!-- Email input - only shown when not logged in -->
+  <input *ngIf="!isLoggedIn" type="email" class="link-input" placeholder="Enter your email" [(ngModel)]="userEmail"
+    required>
+
+  <!-- Upload button -->
+  <button class="upload-button" [disabled]="!canUpload()" (click)="onUpload()">
+    Upload
+  </button>
+</div>

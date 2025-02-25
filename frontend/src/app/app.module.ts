@@ -26,7 +26,7 @@ import { MonthComponent } from './private/timeline/month/month.component';
 import { WeekComponent } from './private/timeline/week/week.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { AuthGuard } from './auth.guard';
 
 const appRoutes: Routes = [
   {
@@ -36,30 +36,61 @@ const appRoutes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'about', component: AboutComponent },
       { path: 'login', component: LoginComponent },
-      { path: 'signup', component: SignupComponent }
-    ]
-  },
-  {
-    path: 'dashboard',
-    component: PrivateComponent,
-    children: [
-      { path: '', component: HomeComponent },
-
-      { path: 'profile', component: UserComponent },
+      { path: 'signup', component: SignupComponent },
       {
-        path: 'timeline', component: TimelineComponent,
+        path: 'profile',
+        component: UserComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'timeline',
+        component: TimelineComponent,
+        canActivate: [AuthGuard],
         children: [
           { path: '', component: TodayComponent },
           { path: 'date', component: DateComponent },
           { path: 'month', component: MonthComponent },
-          { path: 'week', component: WeekComponent },
-
+          { path: 'week', component: WeekComponent }
         ]
       }
-
     ]
   }
 ];
+
+// const appRoutes: Routes = [
+//   {
+//     path: '',
+//     component: PublicComponent,
+//     children: [
+//       { path: '', component: HomeComponent },
+//       { path: 'about', component: AboutComponent },
+//       { path: 'login', component: LoginComponent },
+//       { path: 'signup', component: SignupComponent }
+//     ]
+//   },
+//   {
+//     path: 'dashboard',
+//     component: PrivateComponent,
+//     children: [
+//       { path: '', component: HomeComponent },
+
+//       { path: 'profile', component: UserComponent },
+//       { path: 'about', component: AboutComponent },
+
+//       {
+//         path: 'timeline', component: TimelineComponent,
+//         children: [
+//           { path: '', component: TodayComponent },
+//           { path: 'date', component: DateComponent },
+//           { path: 'month', component: MonthComponent },
+//           { path: 'week', component: WeekComponent },
+
+//         ]
+//       }
+
+//     ]
+//   }
+// ];
 
 
 @NgModule({
