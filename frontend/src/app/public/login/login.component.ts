@@ -1,42 +1,38 @@
+// login.component.ts
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  email: string = '';
+  username: string = '';
   password: string = '';
-  rememberMe: boolean = false;
-  loginError: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
+
 
   constructor(
-    private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) { }
 
-  onClick() {
-    // Get values directly from the DOM elements since you're not using reactive forms
-    const emailElement = document.getElementById('email') as HTMLInputElement;
-    const passwordElement = document.getElementById('password') as HTMLInputElement;
-    const rememberMeElement = document.getElementById('remember-me') as HTMLInputElement;
+  onLogin() {
+    this.errorMessage = '';
+    this.isLoading = true;
 
-    this.email = emailElement?.value || '';
-    this.password = passwordElement?.value || '';
-    this.rememberMe = rememberMeElement?.checked || false;
-
-    // Basic validation
-    if (!this.email || !this.password) {
-      this.loginError = 'Please enter both email and password';
-      return;
-    }
-
-    // Call the auth service for dummy login
-    this.authService.dummyLogin(this.email, this.password);
-
-    // No need to navigate here as the AuthService will handle navigation
+    this.authService.login(this.username, this.password).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        // The navigation is handled in the auth service
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Login failed. Please try again.';
+      }
+    });
   }
 }

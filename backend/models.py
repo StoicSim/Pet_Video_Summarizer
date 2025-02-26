@@ -18,7 +18,7 @@ class User(Base):
     username = Column(String(50), unique=True, index=True)
     email = Column(String(100), unique=True, index=True)
     hashed_password = Column(String(255))
-    pet_name = Column(String(50), nullable=True)
+    pet_name = Column(String(50), nullable=False)
     streak = Column(Integer, default=0)  # User streak counter
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
