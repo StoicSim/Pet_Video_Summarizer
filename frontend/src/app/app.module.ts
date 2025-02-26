@@ -6,6 +6,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { SharedComponent } from './shared/shared.component';
@@ -28,6 +29,10 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthGuard } from './auth.guard';
 import { HttpClientModule } from '@angular/common/http';
+
+import { AuthInterceptor } from './auth.interceptor';
+import { VideoService } from './services/video.service';
+
 
 const appRoutes: Routes = [
   {
@@ -58,40 +63,6 @@ const appRoutes: Routes = [
   }
 ];
 
-// const appRoutes: Routes = [
-//   {
-//     path: '',
-//     component: PublicComponent,
-//     children: [
-//       { path: '', component: HomeComponent },
-//       { path: 'about', component: AboutComponent },
-//       { path: 'login', component: LoginComponent },
-//       { path: 'signup', component: SignupComponent }
-//     ]
-//   },
-//   {
-//     path: 'dashboard',
-//     component: PrivateComponent,
-//     children: [
-//       { path: '', component: HomeComponent },
-
-//       { path: 'profile', component: UserComponent },
-//       { path: 'about', component: AboutComponent },
-
-//       {
-//         path: 'timeline', component: TimelineComponent,
-//         children: [
-//           { path: '', component: TodayComponent },
-//           { path: 'date', component: DateComponent },
-//           { path: 'month', component: MonthComponent },
-//           { path: 'week', component: WeekComponent },
-
-//         ]
-//       }
-
-//     ]
-//   }
-// ];
 
 
 @NgModule({
@@ -121,11 +92,14 @@ const appRoutes: Routes = [
     MatDatepickerModule,
     MatNativeDateModule,
     MatCardModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+
   ],
   providers: [
     provideAnimationsAsync(),
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     importProvidersFrom(HttpClientModule),
+    VideoService
 
   ],
   bootstrap: [AppComponent]

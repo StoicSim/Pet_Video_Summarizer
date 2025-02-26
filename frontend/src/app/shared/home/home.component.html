@@ -1,8 +1,17 @@
 <div class="container">
-
   <h1 class="title">FurTales</h1>
 
   <img src="assets/pic.png" alt="Profile Picture" class="circular-image">
+
+  <!-- Success message -->
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
 
   <!-- Video link input - always visible -->
   <input type="text" class="link-input" placeholder="Enter video link here" [(ngModel)]="videoUrl" required>
@@ -12,7 +21,7 @@
     required>
 
   <!-- Upload button -->
-  <button class="upload-button" [disabled]="!canUpload()" (click)="onUpload()">
-    Upload
+  <button class="upload-button" [disabled]="!canUpload() || isUploading" (click)="onUpload()">
+    {{ isUploading ? 'Uploading...' : 'Upload' }}
   </button>
 </div>

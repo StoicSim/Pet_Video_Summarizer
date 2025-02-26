@@ -5,7 +5,7 @@ from base import SessionLocal,Base, engine
 from models import User, Video, ProcessingStatus  # Import models to register them
 
 #api setup imports
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, HTTPException, status,Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -13,10 +13,13 @@ import uuid
 from passlib.context import CryptContext
 
 
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union,Optional
+
+
+
 
 app = FastAPI()
 
@@ -136,3 +139,134 @@ def login(login_data: LoginData, db: Session = Depends(get_db)):
         "user_id": user.id,
         "username": user.username
     }
+    
+#video url end points
+
+
+
+# Pydantic model for video upload
+class VideoUpload(BaseModel):
+    source_video_link: str
+    email: Optional[str] = None
+
+# JWT token model for auth validation
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    user_id: Optional[str] = None
+
+# Function to decode JWT token
+def decode_token(token: str) -> TokenData:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        user_id: str = payload.get("user_id")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return TokenData(username=username, user_id=user_id)
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+
+# Get current user from token
+async def get_current_user(token: str = Depends(OAuth2PasswordBearer    (tokenUrl="login")), db: Session = Depends(get_db)):
+    token_data = decode_token(token)
+    user = db.query(User).filter(User.id == token_data.user_id).first()
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+# Optional auth - for endpoints that work both with and without auth
+async def get_optional_user(token: str = None, db: Session = Depends(get_db)):
+    if token:
+        try:
+            token_data = decode_token(token)
+            return db.query(User).filter(User.id == token_data.user_id).first()
+        except:
+            return None
+    return None
+
+
+@app.post("/videos/upload", response_model=dict)
+async def upload_video(
+    video_data: VideoUpload,
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+):
+    # Check if the user is authenticated
+    user = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.replace("Bearer ", "")
+        try:
+            token_data = decode_token(token)
+            user = db.query(User).filter(User.id == token_data.user_id).first()
+        except Exception as e:
+            print(f"Token validation error: {e}")
+            # We don't raise an exception here, just continue as anonymous
+
+    # If authenticated, use user info
+    if user:
+        print(f"Authenticated user: {user.username}")
+        email = user.email
+        user_id = user.id
+    # If not authenticated, require email
+    elif video_data.email:
+        print(f"Anonymous upload with email: {video_data.email}")
+        email = video_data.email
+        user_id = None
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Email is required for anonymous uploads"
+        )
+
+    # Create a new video record
+    new_video = Video(
+        user_id=user_id,
+        email=email,
+        source_video_link=video_data.source_video_link,
+        processing_status=ProcessingStatus.PENDING,
+        # Set expiry date (e.g., 30 days from now)
+        expiry_date=datetime.utcnow() + timedelta(days=30)
+    )
+
+    # Add and commit to database
+    db.add(new_video)
+    db.commit()
+    db.refresh(new_video)
+
+    return {
+        "message": "Video uploaded successfully",
+        "video_id": new_video.unique_id
+    }
+
+
+
+# Endpoint to get videos for the current authenticated user
+@app.get("/videos/user")
+async def get_user_videos(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    videos = db.query(Video).filter(Video.user_id == current_user.id).all()
+    return videos
+
+# Endpoint to get a specific video by ID
+@app.get("/videos/{video_id}")
+async def get_video(video_id: str, db: Session = Depends(get_db)):
+    video = db.query(Video).filter(Video.unique_id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return video
+
+# Create the OAuth2PasswordBearer instance
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
+
+# Update your get_current_user function
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
+    token_data = decode_token(token)
+    user = db.query(User).filter(User.id == token_data.user_id).first()
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
