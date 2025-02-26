@@ -217,6 +217,10 @@ async def upload_video(
             status_code=400,
             detail="Email is required for anonymous uploads"
         )
+    if user:
+        expiry_date = datetime.utcnow() + timedelta(days=30)  # 30 days for authenticated users
+    else:
+        expiry_date = datetime.utcnow() + timedelta(minutes=5) 
 
     # Create a new video record
     new_video = Video(
@@ -225,7 +229,7 @@ async def upload_video(
         source_video_link=video_data.source_video_link,
         processing_status=ProcessingStatus.PENDING,
         # Set expiry date (e.g., 30 days from now)
-        expiry_date=datetime.utcnow() + timedelta(days=30)
+        expiry_date=expiry_date
     )
 
     # Add and commit to database
