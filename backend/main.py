@@ -1,25 +1,17 @@
-# main.py
-
-#database creation imports
-from base import SessionLocal,Base, engine
-from models import User, Video, ProcessingStatus  # Import models to register them
-
-#api setup imports
-from fastapi import FastAPI, HTTPException, Depends, HTTPException, status,Header
+from base import SessionLocal, Base, engine
+from models import User, Video, ProcessingStatus
+from fastapi import FastAPI, HTTPException, Depends, status, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 import uuid
 from passlib.context import CryptContext
-
-
-from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from typing import Union,Optional
-
-
-
+from typing import Union, Optional
+import random
+import time
 
 app = FastAPI()
 
@@ -32,10 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 def init_db():
     try:
-        # Create all tables in the database
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully.")
     except Exception as e:
@@ -83,9 +73,6 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     
     return {"message": "User registered successfully", "user_id": new_user.id}
-
-#login endpoints
-
 
 # JWT Configuration
 SECRET_KEY = "your-secret-key-keep-this-very-secret"  # Change this in production!
@@ -139,10 +126,6 @@ def login(login_data: LoginData, db: Session = Depends(get_db)):
         "user_id": user.id,
         "username": user.username
     }
-    
-#video url end points
-
-
 
 # Pydantic model for video upload
 class VideoUpload(BaseModel):
@@ -167,7 +150,7 @@ def decode_token(token: str) -> TokenData:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 # Get current user from token
-async def get_current_user(token: str = Depends(OAuth2PasswordBearer    (tokenUrl="login")), db: Session = Depends(get_db)):
+async def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="login")), db: Session = Depends(get_db)):
     token_data = decode_token(token)
     user = db.query(User).filter(User.id == token_data.user_id).first()
     if user is None:
@@ -184,10 +167,61 @@ async def get_optional_user(token: str = None, db: Session = Depends(get_db)):
             return None
     return None
 
+# Mock video processing function
+def mock_process_video(video_id: str, db_session):
+    try:
+        # Simulate processing time (2-5 seconds)
+        processing_time = random.uniform(2, 5)
+        time.sleep(processing_time)
+        
+        # Get the video from the database
+        db = db_session()
+        video = db.query(Video).filter(Video.unique_id == video_id).first()
+        
+        if not video:
+            print(f"Video {video_id} not found")
+            return
+        
+        # Update video with processing status
+        video.processing_status = ProcessingStatus.PROCESSING
+        db.commit()
+        
+        # Simulate more processing (1-3 seconds)
+        additional_time = random.uniform(1, 3)
+        time.sleep(additional_time)
+        
+        # Generate mock data
+        animal_types = ["dog", "cat", "bird", "rabbit", "hamster"]
+        
+        # Update video with completed information
+        video.source_video_duration = random.uniform(10, 120)  # 10-120 seconds
+        video.animal_type = random.choice(animal_types)
+        video.summary_video_link = f"https://example.com/processed/{video_id}.mp4"
+        video.summary_text = f"This is a {video.animal_type} video that shows various activities. The animal appears to be happy and playful."
+        video.processing_status = ProcessingStatus.COMPLETED
+        
+        # Commit changes
+        db.commit()
+        print(f"Video {video_id} processing completed successfully")
+        
+    except Exception as e:
+        print(f"Error processing video {video_id}: {e}")
+        try:
+            # Update video with error status
+            video = db.query(Video).filter(Video.unique_id == video_id).first()
+            if video:
+                video.processing_status = ProcessingStatus.FAILED
+                video.error_message = str(e)
+                db.commit()
+        except:
+            pass
+    finally:
+        db.close()
 
 @app.post("/videos/upload", response_model=dict)
 async def upload_video(
     video_data: VideoUpload,
+    background_tasks: BackgroundTasks,
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
@@ -217,6 +251,7 @@ async def upload_video(
             status_code=400,
             detail="Email is required for anonymous uploads"
         )
+        
     if user:
         expiry_date = datetime.utcnow() + timedelta(days=30)  # 30 days for authenticated users
     else:
@@ -228,7 +263,6 @@ async def upload_video(
         email=email,
         source_video_link=video_data.source_video_link,
         processing_status=ProcessingStatus.PENDING,
-        # Set expiry date (e.g., 30 days from now)
         expiry_date=expiry_date
     )
 
@@ -236,13 +270,14 @@ async def upload_video(
     db.add(new_video)
     db.commit()
     db.refresh(new_video)
+    
+    # Trigger the mock processing in background
+    background_tasks.add_task(mock_process_video, new_video.unique_id, SessionLocal)
 
     return {
-        "message": "Video uploaded successfully",
+        "message": "Video uploaded successfully. Processing started.",
         "video_id": new_video.unique_id
     }
-
-
 
 # Endpoint to get videos for the current authenticated user
 @app.get("/videos/user")
