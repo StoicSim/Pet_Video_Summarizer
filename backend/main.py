@@ -461,3 +461,46 @@ async def get_featured_videos(
             result[day_name] = video
     
     return result
+@app.get("/videos/month/{year_month}")
+async def get_videos_by_month(
+    year_month: str = Path(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        # Parse year and month from the path parameter (format: YYYY-MM)
+        year, month = map(int, year_month.split('-'))
+        print(f"Requested year-month: {year}-{month}")
+        
+        # Get the start and end date of the requested month
+        if month == 12:
+            next_year = year + 1
+            next_month = 1
+        else:
+            next_year = year
+            next_month = month + 1
+            
+        start_date = date(year, month, 1)
+        end_date = date(next_year, next_month, 1) - timedelta(days=1)
+        
+        start_datetime = datetime.combine(start_date, datetime_time.min)
+        end_datetime = datetime.combine(end_date, datetime_time.max)
+        
+        print(f"Searching for videos between {start_datetime} and {end_datetime}")
+        
+        # Query videos for the specified month
+        month_videos = db.query(Video).filter(
+            Video.user_id == current_user.id,
+            Video.created_at >= start_datetime,
+            Video.created_at <= end_datetime,
+            Video.processing_status == ProcessingStatus.COMPLETED  # Only return completed videos
+        ).order_by(Video.created_at.desc()).all()
+        
+        print(f"Videos for {year_month}: {len(month_videos)}")
+        
+        return month_videos
+    except Exception as e:
+        print(f"Error processing month request: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")

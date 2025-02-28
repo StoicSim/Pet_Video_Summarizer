@@ -1,13 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-interface MemoryCard {
-  title: string;
-  date: Date;
-  duration: string;
-  summary: string;
-  thumbnailUrl: string;
-  videoLink: string;
-}
+import { VideoService, Video, Memory } from '../../../services/video.service';
 
 @Component({
   selector: 'app-month',
@@ -15,81 +7,41 @@ interface MemoryCard {
   styleUrls: ['./month.component.css']
 })
 export class MonthComponent implements OnInit {
-  currentDate: Date = new Date();
-  totalMemories: number = 0;
-  monthMemories: MemoryCard[] = [
-    {
-      title: "Max's Beach Adventure",
-      date: new Date(2024, 1, 15),
-      duration: "2:30",
-      summary: "Max had an incredible time at the beach today! He chased waves, built sandcastles, and made new furry friends.",
-      thumbnailUrl: "../../assets/max-beach.jpg",
-      videoLink: "https://example.com/video1"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    },
-    {
-      title: "Bella's Training Session",
-      date: new Date(2024, 1, 18),
-      duration: "3:45",
-      summary: "Bella mastered new tricks during her training session. Her focus and dedication were impressive!",
-      thumbnailUrl: "../../assets/bella-training.jpg",
-      videoLink: "https://example.com/video2"
-    }
-    // Add more memory cards as needed
-  ];
+  currentDate = new Date();
+  totalMemories = 0;
+  monthMemories: Memory[] = [];
+  isLoading = true;
+  errorMessage = '';
 
-  constructor() {
-    this.totalMemories = this.monthMemories.length;
-  }
+  constructor(private videoService: VideoService) { }
 
   ngOnInit(): void {
-    // You can fetch the current month's memories here
+    this.loadMonthVideos();
+  }
+
+  loadMonthVideos(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.videoService.getCurrentMonthVideos().subscribe({
+      next: (videos) => {
+        this.totalMemories = videos.length;
+        // Convert backend Video objects to frontend Memory objects
+        this.monthMemories = this.videoService.convertToMemories(videos);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading month videos:', error);
+        this.errorMessage = 'Failed to load memories. Please try again later.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Method to handle video click
+  watchVideo(videoLink: string): void {
+    // You could either navigate to a dedicated video player page
+    // or open the video in a modal/lightbox
+    window.open(videoLink, '_blank');
   }
 }

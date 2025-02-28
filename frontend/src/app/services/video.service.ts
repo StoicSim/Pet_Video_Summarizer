@@ -25,6 +25,16 @@ export interface Video {
   expiry_date: string;
 }
 
+export interface Memory {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  date: Date;
+  duration: string;
+  summary: string;
+  videoLink: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,8 +47,6 @@ export class VideoService {
   ) { }
 
   // Helper method to get HTTP headers with authentication token
-
-  // In video.service.ts
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     console.log("Using auth token:", token);
@@ -52,13 +60,6 @@ export class VideoService {
       'Authorization': `Bearer ${token}`
     });
   }
-  // private getAuthHeaders(): HttpHeaders {
-  //   const token = this.authService.getToken();
-  //   return new HttpHeaders({
-  //     'Content-Type': 'application/json',
-  //     'Authorization': `Bearer ${token}`
-  //   });
-  // }
 
   uploadVideo(videoUrl: string, email?: string): Observable<VideoUploadResponse> {
     // Create the request body
@@ -189,6 +190,55 @@ export class VideoService {
       })
     );
   }
+
+  // New method to get current month videos
+  getCurrentMonthVideos(): Observable<Video[]> {
+    if (!this.authService.isLoggedIn()) {
+      console.warn('Attempted to get current month videos while not logged in');
+      return of([]);
+    }
+
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1; // getMonth() is 0-indexed
+
+    // Format as YYYY-MM
+    const yearMonth = `${year}-${month.toString().padStart(2, '0')}`;
+
+    return this.http.get<Video[]>(
+      `${this.apiUrl}/videos/month/${yearMonth}`,
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching current month videos:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Helper method to convert backend Video to frontend Memory format
+  convertToMemories(videos: Video[]): Memory[] {
+    return videos.map(video => {
+      // Generate a thumbnail from the summary video link
+      // This assumes you have thumbnail generation or can use the video URL as thumbnail
+      const thumbnailUrl = video.summary_video_link
+        ? video.summary_video_link.replace('.mp4', '-thumbnail.jpg')
+        : '/assets/images/default-thumbnail.jpg';
+
+      // Format duration from seconds to MM:SS
+      const minutes = Math.floor(video.source_video_duration / 60);
+      const seconds = Math.floor(video.source_video_duration % 60);
+      const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+      return {
+        id: video.unique_id,
+        title: `${video.animal_type.charAt(0).toUpperCase() + video.animal_type.slice(1)} Video`,
+        thumbnailUrl: thumbnailUrl,
+        date: new Date(video.created_at),
+        duration: formattedDuration,
+        summary: video.summary_text || 'No summary available',
+        videoLink: video.summary_video_link || video.source_video_link
+      };
+    });
+  }
 }
-
-

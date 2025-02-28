@@ -4,11 +4,48 @@
     <p class="month-subtitle">{{ totalMemories }} memories this month</p>
   </div>
 
-  <div class="feature-cards-container">
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Loading your memories...</p>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-container" *ngIf="errorMessage">
+    <div class="error-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+    <p>{{ errorMessage }}</p>
+    <button (click)="loadMonthVideos()" class="retry-button">Try Again</button>
+  </div>
+
+  <!-- No memories message -->
+  <div class="no-data-container" *ngIf="!isLoading && !errorMessage && monthMemories.length === 0">
+    <div class="no-data-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+        </path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+    </div>
+    <p>No memories found for this month.</p>
+    <p>Upload a video to create your first memory!</p>
+  </div>
+
+  <!-- Memory cards -->
+  <div class="feature-cards-container" *ngIf="!isLoading && !errorMessage && monthMemories.length > 0">
     <div class="feature-card" *ngFor="let memory of monthMemories">
       <h3 class="feature-title">{{ memory.title }}</h3>
 
-      <div class="video-thumbnail">
+      <div class="video-thumbnail" (click)="watchVideo(memory.videoLink)">
         <img [src]="memory.thumbnailUrl" [alt]="memory.title + ' thumbnail'" class="thumbnail-img">
         <div class="play-overlay">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
