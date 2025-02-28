@@ -1,29 +1,55 @@
-<div class="entry-content">
-  <div class="media-content">
-    <div class="video-thumbnail">
-      <img src="../../assets/pic.png" [alt]="entry.petName + ' video thumbnail'" class="thumbnail-img">
-      <div class="play-overlay">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polygon points="10 8 16 12 10 16 10 8"></polygon>
-        </svg>
+<!-- Loading state -->
+<div *ngIf="loading" class="loading-spinner">
+  <p>Loading today's pet summary...</p>
+  <!-- Add a spinner here if you want -->
+</div>
+
+<!-- Error state -->
+<div *ngIf="error && !loading" class="error-message">
+  <p>{{ error }}</p>
+</div>
+
+<!-- Content when there is a video today -->
+<div *ngIf="hasVideoToday && !loading && !error" class="entry-content">
+  <div class="video-content">
+    <div class="media-content">
+      <div class="video-thumbnail">
+        <img [src]="entry.thumbnailUrl" [alt]="entry.petName + ' video thumbnail'" class="thumbnail-img">
+        <div class="play-overlay" *ngIf="entry.videoLink && entry.processingStatus === 'completed'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+        </div>
+      </div>
+      <h3 class="thumbnail-title">{{ entry.petName }}</h3>
+    </div>
+
+    <div class="text-content">
+      <h2 class="pet-title">{{ entry.petName }}</h2>
+      <p class="summary">{{ entry.summary }}</p>
+      <div class="actions">
+        <a *ngIf="entry.processingStatus === 'completed'" [href]="entry.videoLink" target="_blank" class="video-link">
+          <span class="link-text">Watch Summary Video</span>
+          <i class="fas fa-play-circle"></i>
+        </a>
+        <a [href]="entry.sourceVideoLink" target="_blank" class="video-link">
+          <span class="link-text">Watch Full Video</span>
+          <i class="fas fa-video"></i>
+        </a>
+        <span *ngIf="entry.processingStatus !== 'completed' && entry.processingStatus !== ''" class="processing-status">
+          Status: {{ entry.processingStatus }}
+        </span>
       </div>
     </div>
-    <h3 class="thumbnail-title">{{ entry.petName }}</h3>
   </div>
-  <div class="text-content">
-    <h2 class="pet-title">{{ entry.petName }}</h2>
-    <p class="summary">{{ entry.summary }}</p>
-    <a [href]="entry.videoLink" target="_blank" class="video-link">
-      <span class="link-text">Watch Full Video</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-        <polyline points="15 3 21 3 21 9"></polyline>
-        <line x1="10" y1="14" x2="21" y2="3"></line>
-      </svg>
-    </a>
-  </div>
+</div>
 
+<!-- No video today state -->
+<div *ngIf="!hasVideoToday && !loading && !error" class="entry-content no-video-content">
+  <div class="text-content">
+    <h2 class="pet-title">No Video Today</h2>
+    <p class="summary">{{ entry.summary }}</p>
+  </div>
 </div>

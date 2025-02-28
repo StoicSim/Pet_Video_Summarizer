@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
+import { VideoService, Video } from '../../../services/video.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-date',
@@ -9,40 +12,48 @@ import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 export class DateComponent implements OnInit {
   selectedDate: Date | null = null;
   hasSelectedDate: boolean = false;
-  timelineEntry: any = null; // Will hold the entry data once date is selected
+  timelineEntry: Video | null = null;
+  loading: boolean = false;
+  error: string | null = null;
 
-  constructor() { }
+  constructor(private videoService: VideoService) { }
 
   ngOnInit(): void { }
 
-  // Fix for the type error in the template
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
-    // Example implementation - customize as needed
-    // This adds a custom class to dates that have entries
-    // You would replace this logic with your actual data
-
-    // For example, highlighting specific dates
-    const hasEntry = this.hasEntryForDate(cellDate);
-    return hasEntry ? 'date-with-entry' : '';
+    // This logic should be implemented based on your backend data
+    // For now, we'll return an empty string
+    return '';
   }
 
-  // Helper method to check if a date has an entry
-  private hasEntryForDate(date: Date): boolean {
-    // Replace with your actual logic to check if a date has entries
-    // For example, comparing with dates from your backend
-    return false; // Placeholder
-  }
-
-  onDateSelected(event: any) { // Changed from MatDatepickerInputEvent to any
+  onDateSelected(event: Date) {
     this.selectedDate = event;
-    // Mock data - replace with actual API call
-    this.timelineEntry = {
-      petName: "Max",
-      date: this.selectedDate,
-      summary: "Max had a wonderful adventure at the park today! He made new friends and showed off his impressive fetch skills. His energy and enthusiasm brought joy to everyone around.",
-      videoLink: "https://drive.google.com/file/d/example1",
-      thumbnailUrl: "../../assets/max-thumbnail.jpg"
-    };
     this.hasSelectedDate = true;
+    this.loading = true;
+    this.error = null;
+
+    // Create a new date object and set it to midnight in the local timezone
+    // This prevents timezone issues when converting to ISO string
+    const localDate = new Date(event);
+
+    console.log("Selected date in calendar:", event);
+    console.log("Date being used for API call:", localDate);
+
+    this.videoService.getVideosByDate(localDate).pipe(
+      catchError(err => {
+        console.error("Error fetching videos:", err);
+        this.error = 'An error occurred while fetching the video data.';
+        return of([]);
+      })
+    ).subscribe(videos => {
+      this.loading = false;
+      console.log(`Received ${videos.length} videos for date:`, localDate);
+      if (videos.length > 0) {
+        this.timelineEntry = videos[0]; // Assuming we show the first video for the day
+      } else {
+        this.timelineEntry = null;
+        this.error = 'No videos found for this date.';
+      }
+    });
   }
 }

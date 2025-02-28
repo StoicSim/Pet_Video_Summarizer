@@ -7,15 +7,25 @@
       Browse through past adventures and relive those special moments!
     </p>
 
-    <!-- Show this after date selection -->
-    <div *ngIf="hasSelectedDate">
-      <h2 class="pet-title">{{ timelineEntry.petName }} on {{ selectedDate | date:'yyyy/MM/dd' }}</h2>
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading-spinner">
+      <p>Loading video data...</p>
+    </div>
 
-      <!-- Move thumbnail into text content area -->
+    <!-- Error state -->
+    <div *ngIf="error" class="error-message">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Show this after date selection and data is loaded -->
+    <div *ngIf="hasSelectedDate && timelineEntry && !loading && !error">
+      <h2 class="pet-title">{{ timelineEntry.animal_type }} on {{ selectedDate | date:'yyyy/MM/dd' }}</h2>
+
       <div class="video-thumbnail-container">
         <div class="video-thumbnail">
-          <img src="../../assets/pic.png" [alt]="timelineEntry.petName + ' video thumbnail'" class="thumbnail-img">
-          <div class="play-overlay">
+          <img [src]="timelineEntry.source_video_link" [alt]="timelineEntry.animal_type + ' video thumbnail'"
+            class="thumbnail-img">
+          <div class="play-overlay" *ngIf="timelineEntry.summary_video_link">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -25,8 +35,8 @@
         </div>
       </div>
 
-      <p class="summary">{{ timelineEntry.summary }}</p>
-      <a [href]="timelineEntry.videoLink" target="_blank" class="video-link">
+      <p class="summary">{{ timelineEntry.summary_text }}</p>
+      <a [href]="timelineEntry.source_video_link" target="_blank" class="video-link">
         <span class="link-text">Watch Full Video</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -35,6 +45,9 @@
           <line x1="10" y1="14" x2="21" y2="3"></line>
         </svg>
       </a>
+      <p class="processing-status" *ngIf="timelineEntry.processing_status !== 'completed'">
+        Processing Status: {{ timelineEntry.processing_status }}
+      </p>
     </div>
   </div>
 

@@ -1,6 +1,6 @@
 from base import SessionLocal, Base, engine
 from models import User, Video, ProcessingStatus
-from fastapi import FastAPI, HTTPException, Depends, status, Header, BackgroundTasks
+from fastapi import FastAPI, HTTPException,Path, Depends, status, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -8,10 +8,14 @@ import uuid
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from typing import Union, Optional
+from datetime import datetime,time as datetime_time,timedelta,date
+from datetime import datetime, date, time as datetime_time  # Rename to avoid conflict
+
+from typing import Union, Optional,List
 import random
 import time
+
+from sqlalchemy import text
 
 app = FastAPI()
 
@@ -170,9 +174,7 @@ async def get_optional_user(token: str = None, db: Session = Depends(get_db)):
 # Mock video processing function
 def mock_process_video(video_id: str, db_session):
     try:
-        # Simulate processing time (2-5 seconds)
-        processing_time = random.uniform(2, 5)
-        time.sleep(processing_time)
+        print(f"Starting processing for video {video_id}")
         
         # Get the video from the database
         db = db_session()
@@ -186,9 +188,8 @@ def mock_process_video(video_id: str, db_session):
         video.processing_status = ProcessingStatus.PROCESSING
         db.commit()
         
-        # Simulate more processing (1-3 seconds)
-        additional_time = random.uniform(1, 3)
-        time.sleep(additional_time)
+        # Sleep for 2 minutes (120 seconds)
+        time.sleep(120)
         
         # Generate mock data
         animal_types = ["dog", "cat", "bird", "rabbit", "hamster"]
@@ -202,7 +203,7 @@ def mock_process_video(video_id: str, db_session):
         
         # Commit changes
         db.commit()
-        print(f"Video {video_id} processing completed successfully")
+        print(f"Video {video_id} processing completed successfully after 2 minutes")
         
     except Exception as e:
         print(f"Error processing video {video_id}: {e}")
@@ -309,3 +310,86 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+# timeline endpoints
+
+@app.get("/videos/today")
+async def get_today_videos(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Get all videos uploaded by the current user today.
+    Videos are ordered by creation time (newest first).
+    """
+    # Get today's date range (from midnight to 11:59:59 PM)
+    today = datetime.now().date()
+    start_of_day = datetime.combine(today, datetime.time.min)
+    end_of_day = datetime.combine(today, datetime.time.max)
+    
+    # Query videos created today by the current user
+    today_videos = db.query(Video).filter(
+        Video.user_id == current_user.id,
+        Video.created_at >= start_of_day,
+        Video.created_at <= end_of_day
+    ).order_by(Video.created_at.desc()).all()
+    
+    return today_videos
+
+#timeline for date
+
+@app.get("/videos/date/{selected_date}")
+async def get_videos_by_date(
+    selected_date: str = Path(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        # Print the current user details from the token
+        print(f"Current user from token: ID={current_user.id}, Username={current_user.username}")
+        
+        parsed_date = date.fromisoformat(selected_date)
+        print(f"Requested date: {parsed_date}")
+        
+        # Check database timezone (using proper SQLAlchemy text() function)
+        try:
+            db_timezone = db.execute(text("SHOW timezone")).scalar()
+            print(f"Database timezone: {db_timezone}")
+        except Exception as tz_error:
+            print(f"Unable to get database timezone: {str(tz_error)}")
+        
+        # First, check if this user has any videos at all
+        all_videos = db.query(Video).filter(
+            Video.user_id == current_user.id
+        ).all()
+        
+        print(f"Total videos for user {current_user.id}: {len(all_videos)}")
+        for v in all_videos:
+            print(f"  User video: {v.unique_id}, created_at={v.created_at}")
+        
+        # Now try to get videos for the specific date
+        start_of_day = datetime.combine(parsed_date, datetime_time.min)
+        end_of_day = datetime.combine(parsed_date, datetime_time.max)
+        
+        print(f"Searching for videos between {start_of_day} and {end_of_day}")
+        
+        date_videos = db.query(Video).filter(
+            Video.user_id == current_user.id,
+            Video.created_at >= start_of_day,
+            Video.created_at <= end_of_day
+        ).order_by(Video.created_at.desc()).all()
+        
+        print(f"Videos for date {parsed_date}: {len(date_videos)}")
+        
+        # For debugging, get all videos for this date regardless of user
+        all_date_videos = db.query(Video).filter(
+            Video.created_at >= start_of_day,
+            Video.created_at <= end_of_day
+        ).all()
+        
+        print(f"All videos for date {parsed_date} (any user): {len(all_date_videos)}")
+        for v in all_date_videos:
+            print(f"  Video {v.unique_id}: user_id={v.user_id}, email={v.email}, created_at={v.created_at}")
+        
+        return date_videos
+    except Exception as e:
+        print(f"Error processing date request: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")

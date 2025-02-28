@@ -81,7 +81,7 @@ const appRoutes: Routes = [
     PrivateNavbarComponent,
     DateComponent,
     MonthComponent,
-    WeekComponent
+    WeekComponent,
 
   ],
   imports: [
