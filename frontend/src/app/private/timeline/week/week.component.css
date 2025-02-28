@@ -231,3 +231,136 @@
     font-size: 2rem;
   }
 }
+
+/* Additional styles for the Week component */
+
+/* Loading state */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(155, 107, 165, 0.2);
+  border-top: 5px solid #9b6ba5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error state */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  min-height: 300px;
+  color: #cc5555;
+}
+
+.primary-button {
+  background-color: #9b6ba5;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.primary-button:hover {
+  background-color: #7d4b87;
+  transform: translateY(-2px);
+}
+
+/* Day button with content indicator */
+.day-button.has-content {
+  position: relative;
+}
+
+.day-button.has-content::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: #55cc55;
+  border-radius: 50%;
+}
+
+/* Empty feature card */
+.empty-feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 247, 237, 0.5);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  box-shadow:
+    0 10px 20px rgba(155, 107, 165, 0.15),
+    0 3px 6px rgba(155, 107, 165, 0.1);
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 1.8rem;
+  color: #7d4b87;
+  margin-bottom: 1rem;
+  font-family: 'Segoe Script', cursive;
+}
+
+.empty-text {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.upload-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #9b6ba5;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+  background-color: #7d4b87;
+  transform: translateY(-2px);
+}
+
+/* Add a method to the component to open the video */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}

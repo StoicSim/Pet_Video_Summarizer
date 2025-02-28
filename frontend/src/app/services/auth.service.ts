@@ -96,6 +96,7 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';
     if (error.error instanceof ErrorEvent) {

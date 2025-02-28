@@ -1,19 +1,26 @@
 from base import SessionLocal, Base, engine
 from models import User, Video, ProcessingStatus
-from fastapi import FastAPI, HTTPException,Path, Depends, status, Header, BackgroundTasks
+from fastapi import FastAPI, HTTPException,Path, Depends, status, Header, BackgroundTasks,status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,ConfigDict
 import uuid
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from datetime import datetime,time as datetime_time,timedelta,date
-from datetime import datetime, date, time as datetime_time  # Rename to avoid conflict
+from datetime import datetime, date, time as datetime_time ,timedelta # Rename to avoid conflict
 
-from typing import Union, Optional,List
+from typing import Union, Optional,List,Dict
 import random
 import time
+
+from enum import Enum
+
+import logging
+
+
+from models import Video, User, ProcessingStatus
 
 from sqlalchemy import text
 
@@ -40,12 +47,41 @@ if __name__ == "__main__":
     
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
     pet_name: str
+class ProcessingStatusEnum(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class VideoBase(BaseModel):
+    unique_id: str
+    email: str
+    source_video_link: str
+    source_video_duration: Optional[float] = None
+    animal_type: str
+    summary_video_link: Optional[str] = None
+    summary_text: Optional[str] = None
+    processing_status: ProcessingStatusEnum
+    error_message: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
+
+    model_config = ConfigDict(
+        from_attributes=True,  # This replaces orm_mode in Pydantic v2
+        arbitrary_types_allowed=True
+    )
+
+class VideoResponse(VideoBase):
+    id: int
+    user_id: Optional[str] = None
 
 def get_db():
     db = SessionLocal()
@@ -298,18 +334,18 @@ async def get_video(video_id: str, db: Session = Depends(get_db)):
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 # Update your get_current_user function
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
-        )
+# async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+#     if not token:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Not authenticated"
+#         )
     
-    token_data = decode_token(token)
-    user = db.query(User).filter(User.id == token_data.user_id).first()
-    if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
-    return user
+#     token_data = decode_token(token)
+#     user = db.query(User).filter(User.id == token_data.user_id).first()
+#     if user is None:
+#         raise HTTPException(status_code=401, detail="User not found")
+#     return user
 # timeline endpoints
 
 @app.get("/videos/today")
@@ -393,3 +429,35 @@ async def get_videos_by_date(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+    
+   
+@app.get("/video/featured", response_model=Dict[str, Optional[VideoResponse]])
+async def get_featured_videos(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    logger.debug(f"Featured videos endpoint called by user: {current_user.id}")
+
+    """
+    Get one featured video for each day of the week for the current user
+    """
+    # Initialize result dictionary with days of the week
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    result = {day: None for day in days}
+    
+    # Get completed videos for the current user, ordered by creation date (newest first)
+    user_videos = db.query(Video).filter(
+        Video.user_id == current_user.id,
+        Video.processing_status == ProcessingStatus.COMPLETED 
+    ).order_by(Video.created_at.desc()).all()
+    
+    # Get one recent video for each day of the week
+    for video in user_videos:
+        # Use the datetime object directly instead of converting to isoformat and back
+        day_name = days[video.created_at.weekday()]
+        
+        # If we haven't assigned a video for this day yet, assign this one
+        if result[day_name] is None:
+            result[day_name] = video
+    
+    return result

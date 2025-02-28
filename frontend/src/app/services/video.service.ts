@@ -172,5 +172,23 @@ export class VideoService {
       })
     );
   }
+
+  getFeaturedVideos(): Observable<{ [key: string]: Video | null }> {
+    if (!this.authService.isLoggedIn()) {
+      console.warn('Attempted to get featured videos while not logged in');
+      return of({});
+    }
+
+    return this.http.get<{ [key: string]: Video | null }>(
+      `${this.apiUrl}/video/featured`,
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching featured videos:', error);
+        return of({});
+      })
+    );
+  }
 }
+
 
