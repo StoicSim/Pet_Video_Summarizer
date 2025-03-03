@@ -2,4 +2,4 @@ venv/
 client_secret.json
 backend/client_secret.json
 backend/tokens/
-sample/
+ backend/sample/
