@@ -10,18 +10,23 @@ import { UserService } from '../../services/user.service';
 })
 export class SignupComponent {
   user: User = new User('', '', '', '');
+  errorMessage: string | null = null;
 
   constructor(private router: Router, private userService: UserService) { }
 
   onSignUp() {
     this.userService.registerUser(this.user).subscribe(
       response => {
-        console.log('Registration successful', response);
-        this.router.navigate(['/login']);
+        if (response.auth_url) {
+          // Redirect to Google auth
+          window.location.href = response.auth_url;
+        } else {
+          // Fall back to normal login flow
+          this.router.navigate(['/login']);
+        }
       },
       error => {
-        console.error('Registration failed', error);
-        // Handle error (e.g., show error message to user)
+        this.errorMessage = error.error.detail || 'Registration failed';
       }
     );
   }

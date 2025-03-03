@@ -1,0 +1,23 @@
+<div class="success-container">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h1 class="success-title">Google Drive Connected!</h1>
+
+    <p class="success-message">
+      Your Google Drive folder has been created successfully.
+      You can now upload files directly to your Google Drive.
+    </p>
+
+    <p class="folder-id" *ngIf="folderId">
+      Folder ID: <span class="id">{{ folderId }}</span>
+    </p>
+
+    <p class="redirect-message">
+      You will be redirected to the login page in a few seconds...
+    </p>
+
+    <button class="success-button" (click)="goToLogin()">
+      Continue to Login
+    </button>
+  </div>
+</div>

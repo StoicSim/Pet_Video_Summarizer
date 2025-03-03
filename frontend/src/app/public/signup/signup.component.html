@@ -2,6 +2,10 @@
   <div class="auth-card">
     <h1 class="auth-title">Sign Up</h1>
 
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
     <div class="form-group">
       <label for="username">Username*</label>
       <input type="text" id="username" class="form-control" [(ngModel)]="user.username" name="username"
@@ -23,7 +27,7 @@
     <div class="form-group">
       <label for="pet_name">Pet Name (optional)</label>
       <input type="text" id="pet_name" class="form-control" [(ngModel)]="user.pet_name" name="pet_name"
-        placeholder="Your pet's name" required>
+        placeholder="Your pet's name">
     </div>
 
     <button class="auth-button" (click)="onSignUp()">Create an Account</button>

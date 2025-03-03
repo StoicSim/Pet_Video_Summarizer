@@ -32,6 +32,9 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AuthInterceptor } from './auth.interceptor';
 import { VideoService } from './services/video.service';
+import { GoogleDriveService } from './services/google-drive.service';
+import { GoogleAuthComponent } from './google-auth/google-auth.component';
+import { AuthSuccessComponent } from './auth-success/auth-success.component';
 
 
 const appRoutes: Routes = [
@@ -43,6 +46,8 @@ const appRoutes: Routes = [
       { path: 'about', component: AboutComponent },
       { path: 'login', component: LoginComponent },
       { path: 'signup', component: SignupComponent },
+      { path: 'google-auth', component: GoogleAuthComponent },
+      { path: 'auth-success', component: AuthSuccessComponent },
       {
         path: 'profile',
         component: UserComponent,
@@ -82,6 +87,9 @@ const appRoutes: Routes = [
     DateComponent,
     MonthComponent,
     WeekComponent,
+    GoogleAuthComponent,
+    AuthSuccessComponent
+
 
   ],
   imports: [
@@ -95,11 +103,15 @@ const appRoutes: Routes = [
     BrowserAnimationsModule,
 
   ],
+  exports: [RouterModule],
+
   providers: [
     provideAnimationsAsync(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     importProvidersFrom(HttpClientModule),
-    VideoService
+    VideoService,
+    GoogleDriveService,
+
 
   ],
   bootstrap: [AppComponent]

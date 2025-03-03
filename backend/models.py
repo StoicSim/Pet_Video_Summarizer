@@ -19,14 +19,14 @@ class User(Base):
     email = Column(String(100), unique=True, index=True)
     hashed_password = Column(String(255))
     pet_name = Column(String(50), nullable=False)
-    streak = Column(Integer, default=0)  # User streak counter
+    streak = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    last_active_date = Column(DateTime(timezone=True), server_default=func.now())  # For streak calculation
+    last_active_date = Column(DateTime(timezone=True), server_default=func.now())
+    google_drive_folder_id = Column(String(255), nullable=True)  # New field
     
     # Relationships
     videos = relationship("Video", back_populates="user")
-    
 class Video(Base):
     __tablename__ = "videos"
     

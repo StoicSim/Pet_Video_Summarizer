@@ -1,0 +1,67 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.auth-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.content-section,
+.loading-section,
+.error-section {
+  margin: 1.5rem 0;
+}
+
+.auth-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  margin: 1rem 0;
+}
+
+.google-button {
+  background-color: #4285F4;
+  color: white;
+}
+
+.secondary {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.error-message {
+  color: #d9534f;
+  text-align: center;
+}
+
+.button-group {
+  margin: 1.5rem 0;
+}

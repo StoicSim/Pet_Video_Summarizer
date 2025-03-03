@@ -1,0 +1,28 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1 class="auth-title">Connect Google Drive</h1>
+
+    <div *ngIf="isLoading" class="loading-section">
+      <p>Loading Google authorization...</p>
+      <!-- Add a loading spinner here if desired -->
+    </div>
+
+    <div *ngIf="errorMessage" class="error-section">
+      <p class="error-message">{{ errorMessage }}</p>
+      <button class="auth-button" (click)="continueWithoutGoogle()">Continue to Login</button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage" class="content-section">
+      <p>We need permission to create a folder in your Google Drive for storing your uploads.</p>
+
+      <div class="button-group">
+        <a *ngIf="authUrl" [href]="authUrl" class="auth-button google-button">
+          Connect Google Drive
+        </a>
+        <button class="auth-button secondary" (click)="continueWithoutGoogle()">Skip for now</button>
+      </div>
+
+      <p class="note">You can always connect your Google Drive later from your account settings.</p>
+    </div>
+  </div>
+</div>

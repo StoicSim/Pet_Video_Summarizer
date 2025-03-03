@@ -23,6 +23,10 @@ import logging
 from models import Video, User, ProcessingStatus
 
 from sqlalchemy import text
+# Include the router from google_drive.py (save the artifact above as google_drive.py)
+from google_drive import router as google_drive_router
+
+# Add the router to your FastAPI app
 
 app = FastAPI()
 
@@ -44,7 +48,9 @@ def init_db():
 
 if __name__ == "__main__":
     init_db()
-    
+  
+app.include_router(google_drive_router)
+  
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 logging.basicConfig(level=logging.DEBUG)
@@ -112,7 +118,36 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    return {"message": "User registered successfully", "user_id": new_user.id}
+    # Generate Google Auth URL
+    from google_auth_oauthlib.flow import Flow
+    CLIENT_SECRET_FILE = 'client_secret.json'  # Make sure this file exists
+    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+    REDIRECT_URI = 'http://127.0.0.1:8000/google/callback'
+    
+    try:
+        flow = Flow.from_client_secrets_file(
+            CLIENT_SECRET_FILE,
+            scopes=SCOPES,
+            redirect_uri=REDIRECT_URI
+        )
+        
+        # Generate authorization URL
+        auth_url, state = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            state=new_user.id  # Pass user_id as state to retrieve in callback
+        )
+        
+        return {
+            "message": "User registered successfully", 
+            "user_id": new_user.id,
+            "auth_url": auth_url  # Return the auth URL for redirection
+        }
+    except Exception as e:
+        # If Google auth setup fails, still return success for registration
+        print(f"Error setting up Google auth: {e}")
+        return {"message": "User registered successfully", "user_id": new_user.id}
+    
 
 # JWT Configuration
 SECRET_KEY = "your-secret-key-keep-this-very-secret"  # Change this in production!
