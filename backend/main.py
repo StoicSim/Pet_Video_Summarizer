@@ -24,7 +24,8 @@ from models import Video, User, ProcessingStatus
 
 from sqlalchemy import text
 # Include the router from google_drive.py (save the artifact above as google_drive.py)
-from google_drive import router as google_drive_router
+from google_drive import process_video_with_drive_upload, router as google_drive_router
+
 
 # Add the router to your FastAPI app
 
@@ -344,7 +345,7 @@ async def upload_video(
     db.refresh(new_video)
     
     # Trigger the mock processing in background
-    background_tasks.add_task(mock_process_video, new_video.unique_id, SessionLocal)
+    background_tasks.add_task(process_video_with_drive_upload, new_video.unique_id, SessionLocal)
 
     return {
         "message": "Video uploaded successfully. Processing started.",
