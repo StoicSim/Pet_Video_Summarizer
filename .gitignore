@@ -4,3 +4,5 @@ backend/client_secret.json
 backend/tokens/
 backend/sample/
 backend/.env
+backend/temp_clips/
+backend/processed_cb2d477d-73fc-4373-b265-ba44b7ff190a
