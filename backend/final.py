@@ -1,30 +1,61 @@
+from summary import *
+from email_service import send_video_upload_notification,send_welcome_email
+from models import User,Video
+from sqlalchemy.orm import Session
+
 
 from summary import *
+from email_service import send_video_upload_notification, send_welcome_email
+from models import User, Video, ProcessingStatus
+from sqlalchemy.orm import Session
 
-def process_video(input_video_link, output_video="highlight_summary.mp4", chunk_duration=900, max_clips=10):
+def process_video(input_video_link, output_video="highlight_summary.mp4", chunk_duration=900, max_clips=10, background_tasks=None, user_email=None, video_id=None, db: Session = None):
     """
     Process video by splitting it into chunks, analyzing each chunk, 
     then selecting only the most important moments for the final summary.
     
     Args:
-        input_video: Path to the input video file.
+        input_video_link: URL or path to the input video file.
         output_video: Path to the output video file.
         chunk_duration: Duration of each chunk in seconds.
         max_clips: Maximum number of clips to include in final video.
+        background_tasks: BackgroundTasks object for scheduling background tasks.
+        user_email: Email of the user processing the video.
+        video_id: Unique identifier of the video being processed.
+        db: SQLAlchemy database session.
     """
     # Start the timer
     start_time = time.time()
     start_datetime = datetime.datetime.now()
     print(f"Processing started at: {start_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    # Handle video and user association
+    if db and video_id:
+        video = db.query(Video).filter(Video.unique_id == video_id).first()
+        if not video:
+            raise ValueError(f"Video with id {video_id} not found")
+        
+        user = None
+        if video.user_id:
+            user = db.query(User).filter(User.id == video.user_id).first()
+        
+        video.processing_status = ProcessingStatus.PROCESSING
+        db.commit()
+    else:
+        video = None
+        user = None
+
+    
     if "youtube.com" in input_video_link or "youtu.be" in input_video_link:
         input_video = download_youtube_video_480p(input_video_link)
     elif "drive.google.com" in input_video_link:
         input_video = download_from_gdrive(input_video_link, "gdrive.mp4")
     else:
-        raise ValueError("Unsupported URL format. Please provide a YouTube or Google Drive link.")
+        input_video = input_video_link
 
-    
-    
+    if not os.path.exists(input_video):
+        raise ValueError(f"Input video file not found: {input_video}")
+
     # Define all API keys
     api_keys = [
         'AIzaSyC-JOfG2Oc3CppcZVC3FxwbEXzSm9y1Zgs',
@@ -108,7 +139,7 @@ def process_video(input_video_link, output_video="highlight_summary.mp4", chunk_
     print(f"End time: {end_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*50)
     
-    return {
+    result = {
         "full_narrative": all_narratives,
         "selected_moments": selected_moments,
         "overall_summary": overall_summary,
@@ -120,20 +151,43 @@ def process_video(input_video_link, output_video="highlight_summary.mp4", chunk_
             "end_time": end_datetime.strftime('%Y-%m-%d %H:%M:%S')
         }
     }
+    
+    if db and video:
+        video.summary_video_link = output_video
+        video.summary_text = overall_summary
+        video.processing_status = ProcessingStatus.COMPLETED
+        db.commit()
+
+    if background_tasks and user_email and video_id:
+        background_tasks.add_task(
+            send_video_upload_notification,
+            user_email,
+            video_id,
+            output_video
+        )
+    
+    return result
 
 if __name__ == "__main__":
-    result = process_video("https://www.youtube.com/watch?v=Nzw1JHe1HCo&ab_channel=CatswithGoPro", "cat_highlights_final.mp4", chunk_duration=900, max_clips=12)
+    # This part should be removed or modified to work with your actual database session
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    
+    engine = create_engine('your_database_url_here')
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    db = SessionLocal()
+    
+    result = process_video(
+        "https://www.youtube.com/watch?v=Nzw1JHe1HCo&ab_channel=CatswithGoPro",
+        "cat_highlights_final.mp4",
+        chunk_duration=900,
+        max_clips=12,
+        db=db,
+        video_id="some_video_id_here"
+    )
     
     # Save the processing results to a JSON file
     with open("processing_results.json", "w") as f:
-        # Convert datetime objects to strings
-        json_result = {
-            "full_narrative": result["full_narrative"],
-            "selected_moments": result["selected_moments"],
-            "overall_summary": result["overall_summary"],
-            "output_video": result["output_video"],
-            "processing_time": result["processing_time"]
-        }
-        json.dump(json_result, f, indent=2)
+        json.dump(result, f, indent=2)
     
     print(f"Results saved to processing_results.json")
