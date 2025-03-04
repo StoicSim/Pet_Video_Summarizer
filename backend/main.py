@@ -26,6 +26,9 @@ from sqlalchemy import text
 # Include the router from google_drive.py (save the artifact above as google_drive.py)
 from google_drive import process_video_with_drive_upload, router as google_drive_router
 
+from email_service import send_welcome_email, send_video_upload_notification
+from fastapi import BackgroundTasks
+
 
 # Add the router to your FastAPI app
 
@@ -98,7 +101,7 @@ def get_db():
         db.close()
 
 @app.post("/register")
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
+def register_user(user: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     # Check if username or email already exists
     if db.query(User).filter(User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already registered")
@@ -119,6 +122,8 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
+    # Send welcome email
+    background_tasks.add_task(send_welcome_email, new_user.email, new_user.username)    
     # Generate Google Auth URL
     from google_auth_oauthlib.flow import Flow
     CLIENT_SECRET_FILE = 'client_secret.json'  # Make sure this file exists
@@ -148,8 +153,6 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         # If Google auth setup fails, still return success for registration
         print(f"Error setting up Google auth: {e}")
         return {"message": "User registered successfully", "user_id": new_user.id}
-    
-
 # JWT Configuration
 SECRET_KEY = "your-secret-key-keep-this-very-secret"  # Change this in production!
 ALGORITHM = "HS256"
@@ -344,19 +347,17 @@ async def upload_video(
     db.commit()
     db.refresh(new_video)
     
-    # Trigger the mock processing in background
-    background_tasks.add_task(process_video_with_drive_upload, new_video.unique_id, SessionLocal)
+    # Trigger the processing in background and pass the background_tasks object
+    background_tasks.add_task(process_video_with_drive_upload, new_video.unique_id, SessionLocal, background_tasks)
+    
+    # Send email notification for anonymous users
+    if video_data.email:
+        background_tasks.add_task(send_video_upload_notification, video_data.email, new_video.unique_id)
 
     return {
         "message": "Video uploaded successfully. Processing started.",
         "video_id": new_video.unique_id
     }
-
-# Endpoint to get videos for the current authenticated user
-@app.get("/videos/user")
-async def get_user_videos(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    videos = db.query(Video).filter(Video.user_id == current_user.id).all()
-    return videos
 
 # Endpoint to get a specific video by ID
 @app.get("/videos/{video_id}")

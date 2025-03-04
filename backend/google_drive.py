@@ -12,6 +12,10 @@ import random
 from googleapiclient.http import MediaFileUpload
 from models import Video
 
+from fastapi import BackgroundTasks
+import asyncio
+from email_service import send_video_upload_notification
+
 SAMPLE_VIDEOS_FOLDER = 'sample'  # Folder containing sample videos
 
 
@@ -66,7 +70,9 @@ def get_drive_service(user_id: str):
     except Exception as e:
         print(f"Error getting Drive service: {e}")
         return None
-def upload_sample_video_to_drive(user_id: str, video_id: str, db: Session):
+
+
+def upload_sample_video_to_drive(user_id: str, video_id: str, db: Session, background_tasks: BackgroundTasks = None):
     try:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -121,6 +127,15 @@ def upload_sample_video_to_drive(user_id: str, video_id: str, db: Session):
         file_url = file.get('webViewLink')
         print(f"Successfully uploaded video to Google Drive: {file_url}")
         
+        # Send email notification
+        if background_tasks and user.email:
+            # Create an event loop and run the email sending function
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(send_video_upload_notification(user.email, video_id, file_url))
+            loop.close()
+            print(f"Email notification sent to {user.email}")
+        
         return file_url
     
     except Exception as e:
@@ -128,9 +143,9 @@ def upload_sample_video_to_drive(user_id: str, video_id: str, db: Session):
         import traceback
         traceback.print_exc()
         return None
-      
-      
-def process_video_with_drive_upload(video_id: str, db_session):
+
+# Now modify the process_video_with_drive_upload function to pass the background_tasks
+def process_video_with_drive_upload(video_id: str, db_session, background_tasks: BackgroundTasks = None):
     import time
     import random
     from models import Video, ProcessingStatus
@@ -164,15 +179,21 @@ def process_video_with_drive_upload(video_id: str, db_session):
         
         # If user is authenticated and has Google Drive integration, upload sample video
         if video.user_id:
-            summary_video_link = upload_sample_video_to_drive(video.user_id, video.unique_id, db)
+            summary_video_link = upload_sample_video_to_drive(video.user_id, video.unique_id, db, background_tasks)
             if summary_video_link:
                 video.summary_video_link = summary_video_link
             else:
                 # Fallback if Google Drive upload fails
                 video.summary_video_link = f"https://example.com/processed/{video_id}.mp4"
         else:
-            # For anonymous users, just use a mock URL
-            video.summary_video_link = f"https://example.com/processed/{video_id}.mp4"
+            # For anonymous users with email, also send email
+            if video.email and background_tasks:
+                # Create a mock link for anonymous users
+                mock_link = f"https://example.com/processed/{video_id}.mp4"
+                video.summary_video_link = mock_link
+                
+                # Send email notification
+                background_tasks.add_task(send_video_upload_notification, video.email, video.unique_id, mock_link)
         
         # Add summary text
         video.summary_text = f"This is a {animal_type} video that shows various activities. The animal appears to be happy and playful."
@@ -195,7 +216,7 @@ def process_video_with_drive_upload(video_id: str, db_session):
             print(f"Error updating video status: {db_error}")
     finally:
         db.close()
-
+        
 # Initiate Google OAuth flow
 @router.get("/google/auth")
 async def google_auth(user_id: str):

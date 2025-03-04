@@ -11,3 +11,4 @@ python-dotenv
 google-api-python-client
 google-auth-oauthlib
 fastapi-mail
+requests
