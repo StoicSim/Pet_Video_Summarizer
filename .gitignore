@@ -3,3 +3,4 @@ client_secret.json
 backend/client_secret.json
 backend/tokens/
 backend/sample/
+backend/.env
