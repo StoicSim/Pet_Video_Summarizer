@@ -6,7 +6,7 @@
   padding: 2rem;
   height: calc(100vh - 16rem);
   position: relative;
-  /* box-shadow: 0 8px 16px rgba(155, 107, 165, 0.1); */
+  overflow: hidden;
 }
 
 .text-content {
@@ -16,6 +16,7 @@
   flex-direction: column;
   border-left: 3px solid rgba(155, 107, 165, 0.2);
   padding-left: 2rem;
+  overflow: hidden;
 }
 
 .pet-title {
@@ -30,7 +31,27 @@
   line-height: 1.8;
   margin-bottom: 2rem;
   font-size: 1.1rem;
-  flex-grow: 1;
+  overflow-y: scroll;
+  max-height: 200px;
+  padding-right: 10px;
+}
+
+.summary::-webkit-scrollbar {
+  width: 8px;
+}
+
+.summary::-webkit-scrollbar-track {
+  background: rgba(155, 107, 165, 0.1);
+  border-radius: 4px;
+}
+
+.summary::-webkit-scrollbar-thumb {
+  background: rgba(155, 107, 165, 0.5);
+  border-radius: 4px;
+}
+
+.summary::-webkit-scrollbar-thumb:hover {
+  background: rgba(155, 107, 165, 0.7);
 }
 
 .video-link {
@@ -54,7 +75,7 @@
 }
 
 .media-content {
-  flex: 0 0 400px;
+  flex: 0 0 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -78,7 +99,7 @@
 .video-thumbnail {
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 250px;
   border-radius: 15px;
   overflow: hidden;
   cursor: pointer;
@@ -123,7 +144,6 @@
   text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-/* Add decorative elements */
 .media-content::before {
   content: '';
   position: absolute;

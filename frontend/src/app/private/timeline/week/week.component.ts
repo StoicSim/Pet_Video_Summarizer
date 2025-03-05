@@ -25,8 +25,9 @@ export class WeekComponent implements OnInit {
   loading = true;
   error = '';
 
+
   // Fallback image if video thumbnail is not available
-  defaultThumbnail = '../../assets/pic.png';
+  defaultThumbnail = '../../../../assets/pic.png';
 
   // Days of the week in order
   daysOfWeek = [

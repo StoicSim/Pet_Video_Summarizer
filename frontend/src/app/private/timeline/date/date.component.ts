@@ -21,8 +21,7 @@ export class DateComponent implements OnInit {
   ngOnInit(): void { }
 
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
-    // This logic should be implemented based on your backend data
-    // For now, we'll return an empty string
+
     return '';
   }
 
@@ -55,5 +54,11 @@ export class DateComponent implements OnInit {
         this.error = 'No videos found for this date.';
       }
     });
+  }
+
+  openSummaryVideo() {
+    if (this.timelineEntry?.summary_video_link) {
+      window.open(this.timelineEntry.summary_video_link, '_blank');
+    }
   }
 }

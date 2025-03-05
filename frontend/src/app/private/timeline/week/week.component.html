@@ -25,8 +25,8 @@
         <h2 class="feature-title">{{ getSelectedCard()?.petName }} on {{ selectedDay }}</h2>
 
         <div class="video-thumbnail" *ngIf="getSelectedCard()?.summaryVideoLink" (click)="openVideo()">
-          <img [src]="getSelectedCard()?.thumbnailUrl" [alt]="getSelectedCard()?.petName + ' video thumbnail'"
-            class="thumbnail-img">
+          <img [src]="getSelectedCard()?.thumbnailUrl || defaultThumbnail"
+            [alt]="getSelectedCard()?.petName + ' video thumbnail'" class="thumbnail-img">
           <div class="play-overlay">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -36,7 +36,9 @@
           </div>
         </div>
 
-        <p class="feature-summary">{{ getSelectedCard()?.summary }}</p>
+        <div class="feature-summary-container">
+          <p class="feature-summary">{{ getSelectedCard()?.summary }}</p>
+        </div>
 
         <div class="card-actions">
           <a *ngIf="getSelectedCard()?.summaryVideoLink" [href]="getSelectedCard()?.sourceVideoLink" target="_blank"
@@ -57,7 +59,16 @@
         <h2 class="empty-title">No memories for {{ selectedDay }} yet</h2>
         <p class="empty-text">You haven't uploaded any videos for this day of the week. Add a video to see it featured
           here!</p>
-
+        <button class="upload-button" (click)="uploadNewVideo()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          Upload Video
+        </button>
       </div>
     </div>
 

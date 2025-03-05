@@ -86,7 +86,7 @@ export class TodayComponent implements OnInit {
             petName: 'Your Pet',
             summary: 'You haven\'t uploaded any videos of your pet today.',
             videoLink: '',
-            thumbnailUrl: '../../assets/pic.png',
+            thumbnailUrl: '../../../../assets/pic.png',
             animalType: '',
             processingStatus: '',
             sourceVideoLink: ''
@@ -99,5 +99,10 @@ export class TodayComponent implements OnInit {
         console.error('Error fetching today\'s video:', err);
       }
     });
+  }
+  openSummaryVideo() {
+    if (this.entry.videoLink && this.entry.processingStatus === 'completed') {
+      window.open(this.entry.videoLink, '_blank');
+    }
   }
 }

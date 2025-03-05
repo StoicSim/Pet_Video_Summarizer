@@ -41,7 +41,7 @@ class Video(Base):
     
     source_video_link = Column(String(255))
     source_video_duration = Column(Float, nullable=True)  # In seconds
-    animal_type = Column(String(50), index=True)  # Changed to String
+    animal_type = Column(String(50), index=True,nullable=True)  # Changed to String
     
     summary_video_link = Column(String(255), nullable=True)
     summary_text = Column(Text, nullable=True)

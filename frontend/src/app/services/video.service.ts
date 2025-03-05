@@ -82,7 +82,6 @@ export class VideoService {
     // Return the HTTP post observable
     return this.http.post<VideoUploadResponse>(`${this.apiUrl}/videos/upload`, body, options);
   }
-
   getUserVideos(): Observable<Video[]> {
     if (!this.authService.isLoggedIn()) {
       console.warn('Attempted to get user videos while not logged in');
@@ -90,25 +89,29 @@ export class VideoService {
     }
 
     return this.http.get<Video[]>(
-      `${this.apiUrl}/videos/user`,
-      { headers: this.getAuthHeaders() }
+      `${this.apiUrl}/video/today`,  // or create a /videos/user endpoint
+      {
+        headers: this.getAuthHeaders(),
+        observe: 'response'  // Get full response for debugging
+      }
     ).pipe(
+      map(response => {
+        console.log('Full Response:', response);
+        return response.body || [];
+      }),
       catchError(error => {
-        console.error('Error fetching user videos:', error);
+        console.error('Detailed Error:', {
+          status: error.status,
+          message: error.message,
+          url: error.url,
+          headers: error.headers
+        });
         return of([]);
       })
     );
   }
 
-  getVideoStatus(videoId: string): Observable<Video> {
-    const options = this.authService.isLoggedIn()
-      ? { headers: this.getAuthHeaders() }
-      : {};
 
-    return this.http.get<Video>(`${this.apiUrl}/videos/${videoId}`, options);
-  }
-
-  // Method to get today's video for the current user, now including all processing statuses
   getTodayVideo(): Observable<Video | null> {
     if (!this.authService.isLoggedIn()) {
       console.log('User not logged in, cannot fetch today\'s video');
@@ -219,20 +222,22 @@ export class VideoService {
   // Helper method to convert backend Video to frontend Memory format
   convertToMemories(videos: Video[]): Memory[] {
     return videos.map(video => {
+      // Use 'Pet' as default when animal_type is null or undefined
+      const animalType = video.animal_type || 'Pet';
+
       // Generate a thumbnail from the summary video link
-      // This assumes you have thumbnail generation or can use the video URL as thumbnail
       const thumbnailUrl = video.summary_video_link
         ? video.summary_video_link.replace('.mp4', '-thumbnail.jpg')
         : '/assets/images/default-thumbnail.jpg';
 
       // Format duration from seconds to MM:SS
-      const minutes = Math.floor(video.source_video_duration / 60);
-      const seconds = Math.floor(video.source_video_duration % 60);
+      const minutes = Math.floor((video.source_video_duration || 0) / 60);
+      const seconds = Math.floor((video.source_video_duration || 0) % 60);
       const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
       return {
         id: video.unique_id,
-        title: `${video.animal_type.charAt(0).toUpperCase() + video.animal_type.slice(1)} Video`,
+        title: `${animalType.charAt(0).toUpperCase() + animalType.slice(1)} Video`,
         thumbnailUrl: thumbnailUrl,
         date: new Date(video.created_at),
         duration: formattedDuration,

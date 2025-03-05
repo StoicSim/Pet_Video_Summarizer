@@ -17,15 +17,15 @@
       <p>{{ error }}</p>
     </div>
 
-    <!-- Show this after date selection and data is loaded -->
-    <div *ngIf="hasSelectedDate && timelineEntry && !loading && !error">
+    <!-- Scrollable content wrapper -->
+    <div class="text-content-scroll" *ngIf="hasSelectedDate && timelineEntry && !loading && !error">
       <h2 class="pet-title">{{ timelineEntry.animal_type }} on {{ selectedDate | date:'yyyy/MM/dd' }}</h2>
 
       <div class="video-thumbnail-container">
         <div class="video-thumbnail">
-          <img [src]="timelineEntry.source_video_link" [alt]="timelineEntry.animal_type + ' video thumbnail'"
+          <img src="../../../../assets/pic.png" [alt]="timelineEntry.animal_type + ' video thumbnail'"
             class="thumbnail-img">
-          <div class="play-overlay" *ngIf="timelineEntry.summary_video_link">
+          <div class="play-overlay" *ngIf="timelineEntry.summary_video_link" (click)="openSummaryVideo()">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>

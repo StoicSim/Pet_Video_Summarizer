@@ -75,7 +75,7 @@ class VideoBase(BaseModel):
     email: str
     source_video_link: str
     source_video_duration: Optional[float] = None
-    animal_type: str
+    animal_type: Optional[str] = None
     summary_video_link: Optional[str] = None
     summary_text: Optional[str] = None
     processing_status: ProcessingStatusEnum
@@ -385,7 +385,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 #     return user
 # timeline endpoints
 
-@app.get("/videos/today")
+
+
+@app.get("/video/today")
 async def get_today_videos(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Get all videos uploaded by the current user today.
@@ -393,8 +395,8 @@ async def get_today_videos(current_user: User = Depends(get_current_user), db: S
     """
     # Get today's date range (from midnight to 11:59:59 PM)
     today = datetime.now().date()
-    start_of_day = datetime.combine(today, datetime.time.min)
-    end_of_day = datetime.combine(today, datetime.time.max)
+    start_of_day = datetime.combine(today, datetime_time.min)
+    end_of_day = datetime.combine(today, datetime_time.max)
     
     # Query videos created today by the current user
     today_videos = db.query(Video).filter(
@@ -421,9 +423,16 @@ async def get_videos_by_date(
         print(f"Requested date: {parsed_date}")
         
         # Check database timezone (using proper SQLAlchemy text() function)
+        # try:
+        #     db_timezone = db.execute(text("SHOW timezone")).scalar()
+        #     print(f"Database timezone: {db_timezone}")
+        # except Exception as tz_error:
+        #     print(f"Unable to get database timezone: {str(tz_error)}")
+        
         try:
-            db_timezone = db.execute(text("SHOW timezone")).scalar()
-            print(f"Database timezone: {db_timezone}")
+            global_tz = db.execute(text("SELECT @@global.time_zone")).scalar()
+            session_tz = db.execute(text("SELECT @@session.time_zone")).scalar()
+            print(f"Database global timezone: {global_tz}, Session timezone: {session_tz}")
         except Exception as tz_error:
             print(f"Unable to get database timezone: {str(tz_error)}")
         
